@@ -44,6 +44,12 @@ Add this to nginx config:
         }
 ```
 
+Run certbot for HTTPS
+
+```bash
+sudo certbot --nginx
+```
+
 ```bash
 # set up folder
 sudo mkdir -p /usr/alifeee
