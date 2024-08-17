@@ -5,6 +5,7 @@ from typing import Tuple
 import sqlite3
 import os
 import sys
+import dateutil.parser
 import subprocess
 from dotenv import load_dotenv
 
@@ -156,6 +157,8 @@ def search(args):
         ],
     )
     res = res_obj.fetchall()
+    if len(res) == 0:
+        print("no results")
     for r in res:
         print(r)
 
@@ -164,18 +167,26 @@ def filter_(args):
     """Return results with specified max/min heights etc"""
     _, cur = db_connect()
     min_height, max_height = args.min_height, args.max_height
+    before_date = dateutil.parser.parse(args.before)
+    after_date = dateutil.parser.parse(args.after)
     res_obj = cur.execute(
         """
         SELECT rowid, * FROM scores
         WHERE
             max_height >= ? and max_height <= ?
+              and
+            timestamp < ? and timestamp > ?
         """,
         [
             min_height,
             max_height,
+            before_date,
+            after_date,
         ],
     )
     res = res_obj.fetchall()
+    if len(res) == 0:
+        print("no results")
     for r in res:
         print(r)
 
@@ -279,6 +290,8 @@ if __name__ == "__main__":
     parser_filter = subparsers.add_parser("filter")
     parser_filter.add_argument("--min-height", type=int, default=0)
     parser_filter.add_argument("--max-height", type=int, default=999999)
+    parser_filter.add_argument("--after", type=str, default="1970-01-01")
+    parser_filter.add_argument("--before", type=str, default="2500-01-01")
     parser_filter.set_defaults(func=filter_)
 
     arguments = parser.parse_args()
