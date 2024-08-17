@@ -57,4 +57,8 @@ sudo chown -R alifeee:summon2scale .
 python3 -m venv env
 ./env/bin/pip install -r requirements.txt
 # set up systemds
+sudo cp summon2scale_scoreboard.service /etc/systemd/system/summon2scale_scoreboard.service
+sudo systemctl enable summon2scale_scoreboard.service
+sudo systemctl start summon2scale_scoreboard.service
+sudo systemctl status summon2scale_scoreboard.service
 ```
