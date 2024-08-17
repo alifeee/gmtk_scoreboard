@@ -214,6 +214,37 @@ def filter_(args):
 # ▀█████▀░██░░░░░██████▀░██░░██░░░░██░░░░▀█████
 # ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+
+def spurious(args):
+    """mark a row as spurious"""
+    id_ = args.id
+    con, cur = db_connect()
+    # check existence
+    res_obj = cur.execute("SELECT spurious FROM scores where rowid = ?", [id_])
+    res = res_obj.fetchone()
+    if res is None:
+        print(f"Could not find row with id {id_} to update :(")
+        return
+    # current spuriosity
+    current_spuriosity = res[0]
+    if current_spuriosity == 0:
+        new_spuriosity = 1
+    else:
+        new_spuriosity = 0
+    # update
+    cur.execute(
+        "UPDATE scores SET spurious = ? WHERE rowid = ?",
+        [
+            new_spuriosity,
+            id_,
+        ],
+    )
+    con.commit()
+    res_obj = cur.execute("SELECT rowid, * FROM scores where rowid = ?", [id_])
+    res = res_obj.fetchone()
+    print(f"changed spuriousity to {new_spuriosity}: {res}")
+
+
 # ██████▄░▄█████░██░░░░░▄█████░████████░▄█████
 # ██░░░██░██░░░░░██░░░░░██░░░░░░░░██░░░░██░░░░
 # ██░░░██░█████░░██░░░░░█████░░░░░██░░░░█████░
@@ -310,6 +341,12 @@ if __name__ == "__main__":
     parser_filter.add_argument("--before", type=str, default="2500-01-01")
     parser_filter.add_argument("-s", "--spurious", type=int, default=-1)
     parser_filter.set_defaults(func=filter_)
+
+    # spurious
+    parser_spurious = subparsers.add_parser("spurious")
+    parser_spurious.add_argument("-id", "--id", type=int, required=True)
+    parser_spurious.add_argument("-s", "--spurious", action="store_false", default=True)
+    parser_spurious.set_defaults(func=spurious)
 
     arguments = parser.parse_args()
     arguments.func(arguments)
