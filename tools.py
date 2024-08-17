@@ -63,16 +63,17 @@ def createdb(args):
             time_scaling_s REAL,
             blocks_placed INTEGER,
             jumps INTEGER,
-            distance_fallen REAL
+            distance_fallen REAL,
+            spurious INTEGER
         );
     """
     )
 
 
 DUMMY_DATA = [
-    "2024-08-17 16:02:23.144;alifeee;124.22;120;102.40;17.60;63;78;29.4",
-    "2024-08-17 16:06:11.007;jman;112.45;120;90.00;30.00;47;65;18.5",
-    "2024-08-17 16:52:56.614;somebody909;96.54;120;86.55;33.45;39;49;14.6",
+    "2024-08-17 16:02:23.144;alifeee;124.22;120;102.40;17.60;63;78;29.4;0",
+    "2024-08-17 16:06:11.007;jman;112.45;120;90.00;30.00;47;65;18.5;0",
+    "2024-08-17 16:52:56.614;somebody909;96.54;120;86.55;33.45;39;49;14.6;0",
 ]
 
 
@@ -92,7 +93,7 @@ def create(args):
         cur.execute(
             """
         INSERT INTO scores VALUES
-            (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
             datum,
         )
@@ -169,6 +170,17 @@ def filter_(args):
     min_height, max_height = args.min_height, args.max_height
     before_date = dateutil.parser.parse(args.before)
     after_date = dateutil.parser.parse(args.after)
+    spurious = args.spurious  # -1, 0, or 1
+    if spurious == -1:
+        sp1, sp2 = 0, 1
+    elif spurious == 0:
+        sp1, sp2 = 0, 0
+    elif spurious == 1:
+        sp1, sp2 = 1, 1
+    else:
+        raise ValueError(
+            f"{spurious} is not a valid value for spurious. -1, 0, or 1 only"
+        )
     res_obj = cur.execute(
         """
         SELECT rowid, * FROM scores
@@ -176,12 +188,16 @@ def filter_(args):
             max_height >= ? and max_height <= ?
               and
             timestamp < ? and timestamp > ?
+              and
+            spurious = ? or spurious = ?
         """,
         [
             min_height,
             max_height,
             before_date,
             after_date,
+            sp1,
+            sp2,
         ],
     )
     res = res_obj.fetchall()
@@ -292,6 +308,7 @@ if __name__ == "__main__":
     parser_filter.add_argument("--max-height", type=int, default=999999)
     parser_filter.add_argument("--after", type=str, default="1970-01-01")
     parser_filter.add_argument("--before", type=str, default="2500-01-01")
+    parser_filter.add_argument("-s", "--spurious", type=int, default=-1)
     parser_filter.set_defaults(func=filter_)
 
     arguments = parser.parse_args()
