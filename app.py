@@ -104,7 +104,7 @@ def scoreboard_top():
         }
         for r in res
     ]
-    return jsonify(results)
+    return jsonify({"scores": results})
     # return f"tot: {total}\ntimeframe: {timeframe}\nbefore: {earliest_date_str}\n"
 
 
