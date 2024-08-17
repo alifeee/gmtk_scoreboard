@@ -86,6 +86,8 @@ def scoreboard_top():
               and
             spurious = 0
         GROUP BY name
+        ORDER BY
+          MAX(max_height) DESC
         LIMIT ?
     """,
             [
