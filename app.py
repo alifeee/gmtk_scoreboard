@@ -4,6 +4,7 @@ import sqlite3
 import os
 from typing import Tuple
 from flask import Flask, request, jsonify
+from flask_cors import CORS, cross_origin
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 
@@ -11,6 +12,8 @@ load_dotenv()
 SQLITE_FILENAME = os.environ["SQLITE_FILENAME"]
 
 app = Flask(__name__)
+cors = CORS(app)
+app.config["CORS_HEADERS"] = "Content-Type"
 
 
 def db_connect() -> Tuple[sqlite3.Connection, sqlite3.Cursor]:
@@ -20,12 +23,14 @@ def db_connect() -> Tuple[sqlite3.Connection, sqlite3.Cursor]:
 
 
 @app.route("/")
+@cross_origin()
 def hello_world():
     """Test endpoint"""
     return "<p>Hello, World!</p>"
 
 
 @app.route("/scoreboard/top", methods=["GET"])
+@cross_origin()
 def scoreboard_top():
     """get the top scores for a timeframe
     can specify:
@@ -104,6 +109,7 @@ def scoreboard_top():
 
 
 @app.route("/score/new", methods=["POST"])
+@cross_origin()
 def score_new():
     """add a new score to the board!
     e.g.,
