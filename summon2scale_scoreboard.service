@@ -1,0 +1,16 @@
+[Unit]
+Description=Scoreboard server for Summon2Scale
+After=network.target
+
+[Service]
+User=summon2scale
+Group=summon2scale
+
+ExecStart=/usr/alifeee/summon2scale/env/bin/python -m flask run -p 9043
+WorkingDirectory=/usr/alifeee/summon2scale
+
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
