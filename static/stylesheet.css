@@ -1,0 +1,103 @@
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+@font-face {
+  font-family: "BogFace";
+  src: url("/static/BogFace.woff");
+}
+
+body {
+  background-image: url("/static/background_tower.png");
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  height: 100%;
+  color: white;
+  font-family: "BogFace", sans-serif;
+}
+
+header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+h1 {
+  font-size: 5rem;
+  text-align: center;
+  margin-bottom: 0;
+}
+h2 {
+  margin-top: 0;
+}
+
+p {
+  margin: 0;
+}
+
+a,
+button {
+  display: block;
+  width: fit-content;
+  height: fit-content;
+
+  box-sizing: border-box;
+  border-image-source: url("/static/button.png");
+  border-image-slice: 10 5 6 5;
+  /* border-image-width: 10 5 6 5; */
+  /* border-width: 10px 5px 6px 5px; */
+  border-width: 40px 20px 24px 20px;
+  border-style: solid;
+  border-color: black;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  background-color: #a93f62;
+  background-clip: padding-box;
+
+  text-decoration: none;
+  color: white;
+  cursor: pointer;
+}
+
+table {
+  background-color: #000a;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+table tr * {
+  padding: 0.25rem;
+}
+
+form {
+  background-color: #000a;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+form input[type="number"] {
+  width: 5rem;
+}
+
+form button {
+  margin: auto;
+}

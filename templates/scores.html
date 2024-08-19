@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Summon2Scale Scoreboard</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="/static/stylesheet.css" />
+
+    <script src="/static/convert_times.js"></script>
+
+    <meta http-equiv="refresh" content="60" />
+  </head>
+  <body>
+    <header>
+      <h1>Summon2Scale Scoreboard</h1>
+      <h2>MOST RECENT SCORES</h2>
+    </header>
+    <main>
+      <table>
+        <tr>
+          <th></th>
+          <th>Name</th>
+          <th>Height</th>
+          <th>Time</th>
+        </tr>
+        {% if scores|length == 0 %}
+        <tr>
+          <td></td>
+          <td colspan="3">no results...</td>
+        </tr>
+        {% endif %} {% for score in scores %}
+        <tr>
+          <td>{{loop.index}}</td>
+          <td>{{score.name}}</td>
+          <td>{{score.max_height}}</td>
+          <td class="timestamp">{{score.timestamp}}</td>
+        </tr>
+        {% if loop.index == total|int %}
+        <tr>
+          <td></td>
+          <td colspan="3">more scores past this point...</td>
+        </tr>
+        {% endif %} {% endfor %}
+      </table>
+      <form action="/scoreboard/new" method="GET">
+        <label for="total">Total</label>
+        <input type="number" id="total" name="total" value="{{total}}" />
+        <br />
+        <button type="submit">reload</button>
+      </form>
+      <a href="/">Back to homepage</a>
+    </main>
+  </body>
+</html>

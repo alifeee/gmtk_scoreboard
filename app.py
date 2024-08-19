@@ -3,7 +3,7 @@
 import sqlite3
 import os
 from typing import Tuple
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS, cross_origin
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
@@ -26,7 +26,7 @@ def db_connect() -> Tuple[sqlite3.Connection, sqlite3.Cursor]:
 @cross_origin()
 def hello_world():
     """Test endpoint"""
-    return "<p>Hello, World!</p>"
+    return render_template("index.html")
 
 
 @app.route("/scoreboard/top", methods=["GET"])
@@ -42,12 +42,6 @@ def scoreboard_top():
     total = request.args.get("total")
     timeframe = request.args.get("timeframe")
     unique = request.args.get("unique")
-    if unique in [None, True, 1, "1"]:
-        unique = True
-    elif unique in ["0", 0, False]:
-        unique = False
-    else:
-        unique = True
 
     if timeframe == "daily":
         now = datetime.now()
@@ -63,51 +57,101 @@ def scoreboard_top():
 
     earliest_date_str = earliest_date.strftime("%Y-%m-%d %H:%M:%S.%f")
 
-    _, cur = db_connect()
-    if unique is False:
-        res_obj = cur.execute(
-            """
-        SELECT name, max_height, time_building_s, time_scaling_s FROM scores
-        WHERE
-            timestamp > ?
-        LIMIT ?
-    """,
-            [
-                earliest_date_str,
-                total,
-            ],
-        )
+    if unique in ["0", 0, False, "False"]:
+        unique = False
+        sqlformat = {
+            "height": "max_height",
+            "groupby": "",
+        }
     else:
-        res_obj = cur.execute(
-            """
-        SELECT name, MAX(max_height), time_building_s, time_scaling_s FROM scores
+        unique = True
+        sqlformat = {
+            "height": "MAX(max_height)",
+            "groupby": "GROUP BY name",
+        }
+
+    _, cur = db_connect()
+
+    sql = """
+    SELECT name, {height}, timestamp FROM scores
         WHERE
             timestamp > ?
               and
             spurious = 0
-        GROUP BY name
+        {groupby}
         ORDER BY
-          MAX(max_height) DESC
+          {height} DESC
+        LIMIT ?
+    """.format(
+        **sqlformat
+    )
+
+    res_obj = cur.execute(
+        sql,
+        [
+            earliest_date_str,
+            total,
+        ],
+    )
+
+    res = res_obj.fetchall()
+    results = [{"name": r[0], "max_height": r[1], "timestamp": r[2]} for r in res]
+    data = {"scores": results}
+
+    all_accepts = request.headers.get("Accept", "")
+    accepts = all_accepts.split(",")
+    if "text/html" in accepts:
+        return render_template(
+            "scoreboard.html",
+            scores=data["scores"],
+            total=total,
+            timeframe=timeframe,
+            unique=unique,
+        )
+    return data
+
+
+@app.route("/scoreboard/new", methods=["GET"])
+@cross_origin()
+def scoreboard_new():
+    """get the most recent scores
+    can specify:
+    - total
+    e.g.,
+      curl -s "http://127.0.0.1:5000/scoreboard/new?total=10"
+    """
+    total = request.args.get("total")
+    _, cur = db_connect()
+
+    res_obj = cur.execute(
+        """
+        SELECT name, max_height, timestamp FROM scores
+        ORDER BY
+            timestamp DESC
         LIMIT ?
     """,
-            [
-                earliest_date_str,
-                total,
-            ],
-        )
-
+        [total],
+    )
     res = res_obj.fetchall()
     results = [
         {
             "name": r[0],
             "max_height": r[1],
-            "time_building_s": r[2],
-            "time_scaling_s": r[3],
+            "timestamp": r[2],
         }
         for r in res
     ]
-    return jsonify({"scores": results})
-    # return f"tot: {total}\ntimeframe: {timeframe}\nbefore: {earliest_date_str}\n"
+    data = {"scores": results}
+
+    all_accepts = request.headers.get("Accept", "")
+    accepts = all_accepts.split(",")
+    if "text/html" in accepts:
+        return render_template(
+            "scores.html",
+            scores=data["scores"],
+            total=total,
+        )
+    return data
 
 
 @app.route("/score/new", methods=["POST"])
