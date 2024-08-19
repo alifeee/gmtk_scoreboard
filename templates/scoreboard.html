@@ -33,7 +33,7 @@
         <tr>
           <td>{{loop.index}}</td>
           <td>{{score.name}}</td>
-          <td>{{score.max_height}}</td>
+          <td>{{"%.2f" % score.max_height}}</td>
           <td class="timestamp">{{score.timestamp}}</td>
         </tr>
         {% if loop.index == total|int %}
