@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   timestamp_tds = document.querySelectorAll(".timestamp");
   timestamp_tds.forEach((td) => {
     let time_str = td.textContent;
-    let timesince = timeSince(Date.parse(time_str));
+    let timesince = timeSince(Date.parse(`${time_str}Z`));
     td.innerHTML = `<time datetime="${time_str}">${timesince} ago</time>`;
   });
 });
