@@ -6,7 +6,7 @@ After=network.target
 User=summon2scale
 Group=summon2scale
 
-ExecStart=/usr/alifeee/summon2scale/env/bin/python -m flask run -p 9043
+ExecStart=/usr/alifeee/summon2scale/env/bin/python serve.py
 WorkingDirectory=/usr/alifeee/summon2scale
 
 Restart=always
